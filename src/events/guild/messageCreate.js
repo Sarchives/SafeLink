@@ -39,7 +39,7 @@ module.exports = {
                                     ],
                                 });
                         } catch (err) {
-                            message.client.logger.err(err);
+                            message.client.logger.error(err);
                         }
                     }
                     message.fetch(message.id).then((msg) => msg.delete());
