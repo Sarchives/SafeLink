@@ -15,7 +15,7 @@ module.exports.execute = (interaction) => {
                 .setTitle('🏓 Pong!')
                 .addFields({
                     name: 'Bot Latency',
-                    value: `\`\`\`js\n${Math.round(Date.now() - interaction.createdAt)} ms\n\`\`\``,
+                    value: `\`\`\`js\n${Math.round(interaction.createdAt - Date.now())} ms\n\`\`\``,
                     inline: true,
                 }, {
                     name: 'API Latency',
