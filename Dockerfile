@@ -5,8 +5,8 @@ RUN apt update && apt install -y sqlite3
 WORKDIR /usr/src/app
 COPY package*.json ./
 
-RUN npm install 
+RUN yarn install
 
 COPY . .
 
-CMD [ "node", "src/index.js" ]
+CMD [ "yarn", "start" ]
