@@ -10,21 +10,28 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('setup')
         .setDescription('Sets up the bot for first use.')
-        .addStringOption((option) => option
+        .addChannelOption((option) => option
             .setName('log-channel')
-            .setDescription('The channel ID of the channel used for logging dangerous messages.')
+            .setDescription('The channel used for logging dangerous messages.')
             .setRequired(true)
         ),
 };
 
 module.exports.execute = async (interaction) => {
     const guild = interaction.guild.id;
-    const logChannel = interaction.options.getString('log-channel');
+    const logChannel = interaction.options.getChannel('log-channel');
 
     if (!interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
         return interaction.reply({
             ephemeral: true,
             content: 'Sorry, you are not an administrator.',
+        });
+    }
+    
+    if (logChannel.type !== 'GUILD_TEXT') {
+        return interaction.reply({
+            ephemeral: true,
+            content: 'Sorry, you must select a text channel.',
         });
     }
 
@@ -48,7 +55,7 @@ module.exports.execute = async (interaction) => {
                     inline: true,
                 }, {
                     name: 'Log Channel ID',
-                    value: `\`\`\`${logChannel}\`\`\``,
+                    value: `\`\`\`${logChannel.id}\`\`\``,
                     inline: true,
                 }),
         ],
@@ -68,7 +75,7 @@ module.exports.execute = async (interaction) => {
             try {
                 await interaction.client.database.setupInfo.create({
                     guild,
-                    logChannel,
+                    logChannel: logChannel.id,
                 });
             } catch (err) {
                 if (err.name === 'SequelizeUniqueConstraintError') {
