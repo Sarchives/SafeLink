@@ -1,5 +1,5 @@
 # SafeLink
-SafeLink is a Discord bot that's goal is to preotect servers from dangerous links.
+SafeLink is a Discord bot that's goal is to protect servers from dangerous links.
 
 ## Setup
 * Create a `.env` file at the project's root directory and fill out the required keys shown below:
