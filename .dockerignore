@@ -9,3 +9,6 @@ yarn-error.log*
 # Repo files
 *.md
 *.yml
+
+# Data
+*.sqlite

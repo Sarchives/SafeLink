@@ -14,7 +14,7 @@ const client = new Client({
     ],
 });
 
-client.database = require('./db');
+client.database = require('./utils/db');
 client.logger = require('./utils/logger');
 
 client.commandArray = [];

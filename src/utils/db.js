@@ -4,7 +4,7 @@ const database = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
     dialect: 'sqlite',
     logging: false,
-    storage: __basedir + '/db/database.sqlite',
+    storage: __basedir + '/data/database.sqlite',
 });
 
 module.exports = {
