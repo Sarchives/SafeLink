@@ -8,11 +8,11 @@
     "start": "cross-env NODE_ENV=production node .",
     "start:dev": "cross-env NODE_ENV=development nodemon .",
     "lint": "eslint .",
-    "lint:fix": "eslint src/** --fix",
+    "lint:fix": "eslint . --fix",
     "prepare": "husky install"
   },
   "lint-staged": {
-    "**/*": "eslint src/** --fix"
+    "**/*.js": "eslint . --fix"
   },
   "dependencies": {
     "@discordjs/rest": "^0.1.0-canary.0",
@@ -31,7 +31,6 @@
     "eslint": "^8.0.1",
     "husky": "^7.0.2",
     "lint-staged": "^11.2.3",
-    "nodemon": "^2.0.13",
-    "prettier": "^2.4.1"
+    "nodemon": "^2.0.13"
   }
 }
