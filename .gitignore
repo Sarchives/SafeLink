@@ -107,5 +107,8 @@ dist
 .tern-port
 
 # Database
-db/*
-!db/.gitkeep
+database/*
+!database/.gitkeep
+
+# Locks
+package-lock.json

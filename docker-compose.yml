@@ -6,5 +6,5 @@ services:
       - '.env'
     volumes:
       - type: bind
-        source: "./db"
-        target: "/app/src/db"
+        source: "./database"
+        target: "/app/src/database"
