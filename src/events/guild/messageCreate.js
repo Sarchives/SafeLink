@@ -17,9 +17,9 @@ module.exports = {
                     const threatArray = [];
                     data.response.matches.forEach((match) => {
                         const threat = match.threatType.toLowerCase().split('_').join(' ');
-                        threatArray.push(
-                            threat[0].toUpperCase() + threat.substring(1)
-                        );
+                        const formattedThreat = threat[0].toUpperCase() + threat.substring(1);
+                        if (threatArray.includes(formattedThreat)) return;
+                        threatArray.push(formattedThreat);
                     });
                     if (setupData) {
                         try {
@@ -48,7 +48,7 @@ module.exports = {
                             new MessageEmbed()
                                 .setColor('#ED4245')
                                 .setTitle('🚫 Message removed')
-                                .setDescription(`Message automatically removed: **Dangerous link - ${threatArray.join(', ')}**`),
+                                .setDescription(`Message automatically removed: **Dangerous link(s) - ${threatArray.join(', ')}**`),
                         ],
                     });
                 }

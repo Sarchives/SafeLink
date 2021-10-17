@@ -1,5 +1,5 @@
 {
-  "name": "flaki",
+  "name": "safelink",
   "version": "1.0.0",
   "main": "src/index.js",
   "author": "KojiOdyssey",
@@ -16,14 +16,13 @@
   },
   "dependencies": {
     "@discordjs/rest": "^0.1.0-canary.0",
+    "bent": "^7.3.12",
     "cross-env": "^7.0.3",
     "discord-api-types": "0.23.1",
     "discord.js": "^13.2.0",
     "dotenv": "^10.0.0",
     "pino": "^7.0.1",
     "pino-pretty": "^7.1.0",
-    "request": "^2.88.2",
-    "request-promise-native": "^1.0.9",
     "sequelize": "^6.7.0",
     "sqlite3": "^5.0.2"
   },

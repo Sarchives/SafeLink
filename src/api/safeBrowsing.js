@@ -1,4 +1,4 @@
-const fetch = require('request-promise-native');
+const bent = require('bent');
 
 module.exports = async function checkLinks(client, message) {
     const cleanMessage = message
@@ -20,33 +20,40 @@ module.exports = async function checkLinks(client, message) {
 
     if (linkArray.length > 0) {
         try {
-            const response = {
-                method: 'POST',
-                uri: `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.SAFE_BROWSING_API_KEY}`,
-                body: {
-                    client: {
-                        clientId: process.name,
-                        clientVersion: process.version,
-                    },
-                    threatInfo: {
-                        threatTypes: [
-                            'MALWARE',
-                            'POTENTIALLY_HARMFUL_APPLICATION',
-                            'SOCIAL_ENGINEERING',
-                            'THREAT_TYPE_UNSPECIFIED',
-                            'UNWANTED_SOFTWARE',
-                        ],
-                        platformTypes: ['ANY_PLATFORM'],
-                        threatEntryTypes: ['URL'],
-                        threatEntries: [],
-                    },
-                },
-                json: true,
-            };
-            linkArray.forEach(async (match) => {
-                response.body.threatInfo.threatEntries.push({ url: match });
+            const threatEntries = [];
+            linkArray.forEach((match) => {
+                threatEntries.push({ url: match });
             });
-            return { response: await fetch(response) };
+            const form = {
+                client: {
+                    clientId: process.name,
+                    clientVersion: process.version,
+                },
+                threatInfo: {
+                    threatTypes: [
+                        'MALWARE',
+                        'POTENTIALLY_HARMFUL_APPLICATION',
+                        'SOCIAL_ENGINEERING',
+                        'THREAT_TYPE_UNSPECIFIED',
+                        'UNWANTED_SOFTWARE',
+                    ],
+                    // 'ANY_PLATFORM' will not work for some platforms. Reason unknown.
+                    platformTypes: [
+                        'PLATFORM_TYPE_UNSPECIFIED',
+                        'WINDOWS',
+                        'LINUX',
+                        'ANDROID',
+                        'OSX',
+                        'IOS',
+                        'CHROME'
+                    ],
+                    threatEntryTypes: ['URL'],
+                    threatEntries,
+                },
+            };
+            const post = bent(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.SAFE_BROWSING_API_KEY}`, 'POST', 'json', 200);
+            const response = await post(process.name, form);
+            return { response };
         } catch (err) {
             client.logger.error(
                 process.env.NODE_ENV === 'production' ? err.message : err.stack
