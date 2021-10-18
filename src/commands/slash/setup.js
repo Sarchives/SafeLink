@@ -1,104 +1,71 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const {
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
-    Permissions,
-} = require('discord.js');
+const { MessageActionRow, MessageButton, MessageEmbed, Permissions } = require('discord.js');
+const { dbError } = require('../../utils/errors');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('setup')
-        .setDescription('Sets up the bot for first use.')
-        .addChannelOption((option) => option
+        .setName('config')
+        .setDescription('Configurates the bot.')
+        .addChannelOption(option => option
             .setName('log-channel')
             .setDescription('The channel used for logging dangerous messages.')
-            .setRequired(true)
-        ),
-};
+            .setRequired(true)),
+    execute(interaction) {
+        const guild = interaction.guild.id;
+        const logChannel = interaction.options.getChannel('log-channel');
+        const setupData = interaction.client.database.setupInfo;
 
-module.exports.execute = async (interaction) => {
-    const guild = interaction.guild.id;
-    const logChannel = interaction.options.getChannel('log-channel');
+        if (!interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+            return interaction.reply({ ephemeral: true, content: 'Sorry, you are not an administrator.' });
+        }
 
-    if (!interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
-        return interaction.reply({
-            ephemeral: true,
-            content: 'Sorry, you are not an administrator.',
-        });
-    }
-    
-    if (logChannel.type !== 'GUILD_TEXT') {
-        return interaction.reply({
-            ephemeral: true,
-            content: 'Sorry, you must select a text channel.',
-        });
-    }
+        if (logChannel.type !== 'GUILD_TEXT') {
+            return interaction.reply({ ephemeral: true, content: 'Sorry, you must select a text channel.' });
+        }
 
-    const row = new MessageActionRow().addComponents(
-        new MessageButton()
-            .setCustomId('setup_confirm')
-            .setLabel('Confirm')
-            .setStyle('DANGER')
-    );
+        const setupRow = new MessageActionRow().addComponents(
+            new MessageButton()
+                .setCustomId('setup_confirm')
+                .setLabel('Confirm')
+                .setStyle('DANGER'));
 
-    interaction.reply({
-        ephemeral: true,
-        content: 'Is this data correct?',
-        embeds: [
-            new MessageEmbed()
-                .setColor('#58ACBD')
-                .setTitle('📃 Log data')
-                .addFields({
-                    name: 'Guild ID',
-                    value: `\`\`\`${guild}\`\`\``,
-                    inline: true,
-                }, {
-                    name: 'Log Channel ID',
-                    value: `\`\`\`${logChannel.id}\`\`\``,
-                    inline: true,
-                }),
-        ],
-        components: [row],
-    });
+        const logDataEmbed = new MessageEmbed()
+            .setColor('#58ACBD')
+            .setTitle('📃 Log data')
+            .addFields(
+                { name: 'Guild ID', value: `\`\`\`${guild}\`\`\``, inline: true },
+                { name: 'Log Channel ID', value: `\`\`\`${logChannel.id}\`\`\``, inline: true }
+            );
 
-    const filter = (i) =>
-        i.customId === 'setup_confirm' && i.user.id === interaction.user.id;
-    const collector = interaction.channel.createMessageComponentCollector({
-        filter,
-        time: 15000,
-    });
+        interaction.reply({ ephemeral: true, content: 'Is this data correct?', embeds: [logDataEmbed], components: [setupRow] });
 
-    collector.on('collect', async (i) => {
-        if (i.customId === 'setup_confirm') {
-            row.components[0].setDisabled(true);
-            try {
-                await interaction.client.database.setupInfo.create({
-                    guild,
-                    logChannel: logChannel.id,
-                });
-            } catch (err) {
-                if (err.name === 'SequelizeUniqueConstraintError') {
+        const filter = i => i.customId === 'setup_confirm' && i.user.id === interaction.user.id;
+
+        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+
+        collector.on('collect', async (i) => {
+            if (i.customId === 'setup_confirm') {
+                setupRow.components[0].setDisabled(true);
+                try {
+                    const entry = await setupData.findOne({ where: { guild } });
+                    if (entry) {
+                        await setupData.destroy({ where: { guild } });
+                    }
+                    await setupData.create({
+                        guild,
+                        logChannel: logChannel.id,
+                    });
+                } catch (error) {
                     return interaction.followUp({
                         ephemeral: true,
-                        content: 'This guild is already set up or that channel ID is already being used.',
+                        embeds: [dbError(error)],
                     });
                 }
-                return interaction.followUp({
+                await i.reply({
                     ephemeral: true,
-                    embeds: [
-                        new MessageEmbed()
-                            .setColor('#ED4245')
-                            .setTitle('🚫 An error occurred')
-                            .setDescription('An error occurred while adding to the database.')
-                            .addField('Details', `\`\`\`${err.message}\`\`\``),
-                    ],
+                    content: 'Updated database.',
                 });
             }
-            await i.reply({
-                ephemeral: true,
-                content: 'Added to database.',
-            });
-        }
-    });
+        });
+    }
 };

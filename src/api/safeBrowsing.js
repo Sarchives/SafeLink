@@ -6,7 +6,7 @@ module.exports = async function checkLinks(client, message) {
         .replace(/<.+?(:\d+):.+?>/g, '');
     const linkArray = [];
 
-    cleanMessage.split(/\s/).forEach((word) => {
+    cleanMessage.split(/\s/).forEach(word => {
         const wordMatchArray = word
             // Unedited pattern from: https://www.urlregex.com/
             // eslint-disable-next-line no-useless-escape
@@ -24,7 +24,7 @@ module.exports = async function checkLinks(client, message) {
             linkArray.forEach((match) => {
                 threatEntries.push({ url: match });
             });
-            const form = {
+            const formBody = {
                 client: {
                     clientId: process.name,
                     clientVersion: process.version,
@@ -52,12 +52,10 @@ module.exports = async function checkLinks(client, message) {
                 },
             };
             const post = bent(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.SAFE_BROWSING_API_KEY}`, 'POST', 'json', 200);
-            const response = await post(process.name, form);
+            const response = await post(process.name, formBody);
             return { response };
-        } catch (err) {
-            client.logger.error(
-                process.env.NODE_ENV === 'production' ? err.message : err.stack
-            );
+        } catch (error) {
+            client.logger.error(error);
             return { response: { matches: undefined } };
         }
     } else {

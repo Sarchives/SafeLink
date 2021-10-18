@@ -7,6 +7,5 @@ module.exports = {
     },
     logChannel: {
         type: Sequelize.STRING,
-        unique: true,
     },
 };
