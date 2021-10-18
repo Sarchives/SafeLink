@@ -4,8 +4,8 @@ const { dbError } = require('../../utils/errors');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('config')
-        .setDescription('Configures the bot.')
+        .setName('setup')
+        .setDescription('Sets up the bot with guild-specific settings.')
         .addChannelOption(option => option
             .setName('log-channel')
             .setDescription('The channel used for logging dangerous messages.')
@@ -15,7 +15,7 @@ module.exports = {
         const logChannel = interaction.options.getChannel('log-channel');
         const setupData = interaction.client.database.setupInfo;
 
-        if (!interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && !interaction.member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
+        if (!interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR && Permissions.FLAGS.MANAGE_GUILD)) {
             return interaction.reply({ ephemeral: true, content: 'Sorry, you need to have Manage Server or Administrator permissions to execute this command.' });
         }
 
